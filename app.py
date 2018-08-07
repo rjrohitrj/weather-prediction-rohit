@@ -1,4 +1,3 @@
-from flask import Flask
 import numpy as np
 import pandas as pd
 import dash
@@ -9,8 +8,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 import datetime
 import os
-
-server = Flask(__name__)
 
 # Reading the dataset
 THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
@@ -74,10 +71,11 @@ def generate_table(dataframe):
         rows)
 
 # app initialization
-myapp = dash.Dash(__name__, server=server)
+app = dash.Dash(__name__)
+server = app.server
 
 # Setting layout for web page
-myapp.layout = html.Div(id='body', children =[
+app.layout = html.Div(id='body', children =[
 
     # Date Picker Componnets div
     html.Div([dcc.DatePickerSingle(id='date-picker',
@@ -109,7 +107,7 @@ myapp.layout = html.Div(id='body', children =[
 ])
 
 # callback function for date picker object to predict temperature and showing Html Table
-@myapp.callback(Output('temp_table', 'children'), [Input('date-picker', 'date')])
+@app.callback(Output('temp_table', 'children'), [Input('date-picker', 'date')])
 def update_output(date):
     if date is not None:
         year, month, day = map(int,[date[:4], date[5:7], date[8:10]])
@@ -123,7 +121,7 @@ def update_output(date):
         return generate_table(df)
 
 # callback function for Graph
-@myapp.callback(Output('Graph', 'children'), [Input('date-picker', 'date')])
+@app.callback(Output('Graph', 'children'), [Input('date-picker', 'date')])
 def update_graph(date):
     if date is not None:
         year, month, day = map(int,[date[:4], date[5:7], date[8:10]])
@@ -143,7 +141,7 @@ def update_graph(date):
 
 
 # Callback function for changing Image
-@myapp.callback(Output('body', 'style'), [Input('interval-component', 'n_intervals')])
+@app.callback(Output('body', 'style'), [Input('interval-component', 'n_intervals')])
 def update_bg_live(n):
     return {'background-image': 'url({})'.format(bg[n%14]),
             'background-repeat':'no-repeat',
@@ -176,9 +174,5 @@ def model_training(date):
     # returning the predicted temperature
     return int(round(*temperature))
 
-@server.route('/')
-def mydashapp():
-    return myapp.index()
-
 if __name__ == "__main__":
-    server.run()
+    app.run_server(debug=False)
