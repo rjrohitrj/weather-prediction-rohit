@@ -74,10 +74,10 @@ def generate_table(dataframe):
         rows)
 
 # app initialization
-app = dash.Dash(__name__, server=server)
+myapp = dash.Dash(__name__, server=server)
 
 # Setting layout for web page
-app.layout = html.Div(id='body', children =[
+myapp.layout = html.Div(id='body', children =[
 
     # Date Picker Componnets div
     html.Div([dcc.DatePickerSingle(id='date-picker',
@@ -109,7 +109,7 @@ app.layout = html.Div(id='body', children =[
 ])
 
 # callback function for date picker object to predict temperature and showing Html Table
-@app.callback(Output('temp_table', 'children'), [Input('date-picker', 'date')])
+@myapp.callback(Output('temp_table', 'children'), [Input('date-picker', 'date')])
 def update_output(date):
     if date is not None:
         year, month, day = map(int,[date[:4], date[5:7], date[8:10]])
@@ -123,7 +123,7 @@ def update_output(date):
         return generate_table(df)
 
 # callback function for Graph
-@app.callback(Output('Graph', 'children'), [Input('date-picker', 'date')])
+@myapp.callback(Output('Graph', 'children'), [Input('date-picker', 'date')])
 def update_graph(date):
     if date is not None:
         year, month, day = map(int,[date[:4], date[5:7], date[8:10]])
@@ -143,7 +143,7 @@ def update_graph(date):
 
 
 # Callback function for changing Image
-@app.callback(Output('body', 'style'), [Input('interval-component', 'n_intervals')])
+@myapp.callback(Output('body', 'style'), [Input('interval-component', 'n_intervals')])
 def update_bg_live(n):
     return {'background-image': 'url({})'.format(bg[n%14]),
             'background-repeat':'no-repeat',
@@ -178,7 +178,7 @@ def model_training(date):
 
 @server.route('/')
 def mydashapp():
-    return app.index()
+    return myapp.index()
 
 if __name__ == "__main__":
     server.run()
